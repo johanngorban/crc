@@ -1,4 +1,5 @@
 #include "crc16.h"
+#include <stddef.h>
 
 #define CRC16_WIDTH                 (16)
 #define CRC16_TOPBIT                (1 << (CRC16_WIDTH - 1))
@@ -34,4 +35,29 @@ uint16_t crc16_compute(const uint8_t *data, uint16_t length) {
     }
 
     return (remainder ^ CRC16_FINAL_XOR_VALUE);
+}
+
+const uint16_t polynomial = 0x00D8;
+
+uint16_t crc16_old(const uint16_t *data, uint16_t length) {
+    uint16_t crc = 0xFFFF;
+
+    if (data == NULL) {
+        return crc;
+    }
+
+    for (uint16_t i = 0; i < length; i++) {
+        crc ^= data[i] << 8;
+
+        for (uint8_t j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ polynomial;
+            }
+            else {
+                crc <<= 1;
+            }
+        }
+    }
+
+    return crc;
 }
